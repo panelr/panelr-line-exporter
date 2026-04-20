@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Panelr Line Exporter</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      background: #0f1117;
+      color: #e2e8f0;
+      width: 320px;
+    }
+    .header {
+      background: #1a1d2e;
+      border-bottom: 1px solid #2d3147;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo { font-weight: 700; font-size: 14px; color: #fff; }
+    .logo span { color: #f59e0b; }
+    .body { padding: 14px; }
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+    select {
+      width: 100%;
+      background: #1a1d2e;
+      border: 1px solid #2d3147;
+      color: #e2e8f0;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+      margin-bottom: 12px;
+    }
+    select:focus { border-color: #f59e0b; }
+    .btn {
+      width: 100%;
+      padding: 9px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: #f59e0b;
+      color: #0f1117;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .alert {
+      padding: 9px 11px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .alert-info { background: #0c1a2e; border: 1px solid #1e3a5f; color: #7dd3fc; }
+    .alert-warn { background: #451a03; border: 1px solid #78350f; color: #fcd34d; }
+    .progress-bar-track {
+      background: #2d3147;
+      border-radius: 99px;
+      height: 5px;
+      margin: 10px 0 6px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: #f59e0b;
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.3s;
+      width: 0%;
+    }
+    .progress-label { font-size: 11px; color: #64748b; text-align: center; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">panel<span>r</span></div>
+    <span style="color:#64748b;font-size:11px;">Line Exporter</span>
+  </div>
+  <div class="body">
+    <div class="screen active" id="screen-setup">
+      <div style="margin-bottom:12px;">
+        <label>Panel Type</label>
+        <select id="panel-select">
+          <option value="">— Select your panel —</option>
+          <option value="strong8k">Strong8k</option>
+          <option value="trex">T-Rex</option>
+        </select>
+      </div>
+      <div class="alert alert-info" id="setup-hint" style="display:none;">
+        Navigate to the <strong>Lines</strong> page in your panel, then click Extract.
+      </div>
+      <button class="btn" id="btn-extract" disabled>Extract Lines</button>
+    </div>
+
+    <div class="screen" id="screen-extracting">
+      <div class="alert alert-warn" style="margin-bottom:12px;">
+        Keep this tab open while extracting.
+      </div>
+      <div style="font-weight:600;font-size:13px;margin-bottom:4px;">Extracting lines…</div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-label" id="progress-label">Starting…</div>
+    </div>
+
+    <div class="screen" id="screen-done">
+      <div class="alert alert-info" id="done-msg" style="margin-bottom:12px;"></div>
+      <button class="btn" id="btn-open-review">Open Review Tab →</button>
+    </div>
+  </div>
+  <script src="panels.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
