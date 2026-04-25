@@ -1,9 +1,13 @@
 # Panelr Line Exporter
 
-A Chrome extension that extracts lines from your IPTV reseller panel, lets you review and clean the data, then downloads a CSV ready for import into [Panelr.app](https://panelr.app).
+A Chrome extension that extracts subscriber lines from your IPTV reseller panel, lets you review and clean the data, and exports a CSV ready for import into Panelr.
+
+Panelr is an IPTV middleware platform that automates activations, billing, and subscriber management.
+
+Website: https://panelr.app  
+Developer Docs: https://panelr.app/developers.php  
 
 ---
-
 ## Supported Panels
 
 | Panel | Notes |
