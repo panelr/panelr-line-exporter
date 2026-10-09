@@ -44,6 +44,11 @@
       margin-bottom: 12px;
     }
     select:focus { border-color: #f59e0b; }
+    input[type="text"], input[type="password"] {
+      width: 100%; background: #1a1d2e; border: 1px solid #2d3147; color: #e2e8f0;
+      padding: 8px 10px; border-radius: 6px; font-size: 13px; outline: none; margin-bottom: 12px;
+    }
+    input:focus { border-color: #f59e0b; }
     .btn {
       width: 100%;
       padding: 9px;
@@ -101,7 +106,18 @@
           <option value="">— Select your panel —</option>
           <option value="strong8k">Strong8k</option>
           <option value="trex">T-Rex</option>
+          <option value="xui">XUI.One</option>
+          <option value="whmcs">WHMCS (billing system)</option>
         </select>
+      </div>
+      <div id="whmcs-fields" style="display:none;">
+        <div class="alert alert-info">Exports every customer and line from WHMCS. Make an API credential first: WHMCS → System Settings → API Credentials.</div>
+        <label>WHMCS address</label>
+        <input type="text" id="whmcs-url" placeholder="https://billing.example.com">
+        <label>API identifier</label>
+        <input type="text" id="whmcs-id" autocomplete="off">
+        <label>API secret</label>
+        <input type="password" id="whmcs-secret" autocomplete="off">
       </div>
       <div class="alert alert-info" id="setup-hint" style="display:none;">
         Navigate to the <strong>Lines</strong> page in your panel, then click Extract.
@@ -126,6 +142,7 @@
     </div>
   </div>
   <script src="panels.js"></script>
+  <script src="whmcs.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

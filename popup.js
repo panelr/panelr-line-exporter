@@ -13,13 +13,65 @@ function showScreen(id) {
   document.getElementById('screen-' + id).classList.add('active');
 }
 
-panelSelect.addEventListener('change', () => {
-  selectedPanelKey = panelSelect.value;
-  btnExtract.disabled = !selectedPanelKey;
-  setupHint.style.display = selectedPanelKey ? 'block' : 'none';
-});
+const whmcsFields = document.getElementById('whmcs-fields');
+const whmcsUrl    = document.getElementById('whmcs-url');
+const whmcsId     = document.getElementById('whmcs-id');
+const whmcsSecret = document.getElementById('whmcs-secret');
 
-btnExtract.addEventListener('click', startExtraction);
+function whmcsReady() {
+  return whmcsUrl.value.trim() !== '' && whmcsId.value.trim() !== '' && whmcsSecret.value.trim() !== '';
+}
+
+panelSelect.addEventListener('change', async () => {
+  selectedPanelKey = panelSelect.value;
+  const isWhmcs = selectedPanelKey === 'whmcs';
+  whmcsFields.style.display = isWhmcs ? 'block' : 'none';
+  setupHint.style.display = selectedPanelKey && !isWhmcs ? 'block' : 'none';
+  btnExtract.textContent = isWhmcs ? 'Export from WHMCS' : 'Extract Lines';
+  if (isWhmcs && whmcsUrl.value.trim() === '') {
+    // The WHMCS folder is whatever comes before /admin in the open tab
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.url && /^https?:/.test(tab.url)) {
+      const m = tab.url.match(/^(https?:\/\/[^?#]*?)\/admin(\/|$)/);
+      whmcsUrl.value = m ? m[1] : new URL(tab.url).origin;
+    }
+  }
+  btnExtract.disabled = isWhmcs ? !whmcsReady() : !selectedPanelKey;
+});
+[whmcsUrl, whmcsId, whmcsSecret].forEach(el => el.addEventListener('input', () => { btnExtract.disabled = !whmcsReady(); }));
+
+btnExtract.addEventListener('click', () => selectedPanelKey === 'whmcs' ? startWhmcsExport() : startExtraction());
+
+async function startWhmcsExport() {
+  showScreen('extracting');
+  document.querySelector('#screen-extracting .alert-warn').textContent = 'Keep this window open while WHMCS is read.';
+  progressFill.style.width = '15%';
+  progressLabel.textContent = 'Asking for permission to reach WHMCS…';
+  try {
+    const base   = whmcsUrl.value.trim().replace(/\/+$/, '');
+    const origin = new URL(base).origin + '/*';
+    const ok = await chrome.permissions.request({ origins: [origin] });
+    if (!ok) throw new Error('Without permission to reach ' + origin + ' nothing can be read.');
+    const data = await whmcsExport(base, whmcsId.value.trim(), whmcsSecret.value.trim(), (msg) => { progressLabel.textContent = msg; });
+    progressFill.style.width = '100%';
+    const json = JSON.stringify(data, null, 1);
+    await chrome.downloads.download({
+      url: 'data:application/json;charset=utf-8,' + encodeURIComponent(json),
+      filename: 'panelr-whmcs-migration.json',
+      saveAs: true,
+    });
+    const noHash = data.clients.length - data.hashes;
+    doneMsgEl.innerHTML = '<strong>' + data.clients.length + ' customers and ' + data.services.length + ' services exported.</strong> '
+      + (noHash > 0 ? noHash + ' customer' + (noHash === 1 ? '' : 's') + ' came without a login hash; Panelr can email them a link to choose a password. ' : 'Every customer keeps their password. ')
+      + 'In Panelr, open Settings → Panel Plugin → Import Lines → Migrate from WHMCS and upload the file.';
+    btnOpenReview.style.display = 'none';
+    showScreen('done');
+  } catch (e) {
+    progressLabel.textContent = 'Error: ' + e.message;
+    progressFill.style.background = '#ef4444';
+    progressFill.style.width = '100%';
+  }
+}
 
 btnOpenReview.addEventListener('click', () => {
   chrome.tabs.create({ url: chrome.runtime.getURL('review.html') });

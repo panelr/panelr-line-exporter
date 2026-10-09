@@ -1,9 +1,15 @@
 {
   "manifest_version": 3,
   "name": "Panelr.app Line Exporter",
-  "version": "1.0.0",
-  "description": "Export lines from your IPTV panel to .CSV and prep them for Panelr.app import",
-  "permissions": ["activeTab", "scripting", "storage", "tabs"],
+  "version": "1.2.0",
+  "description": "Export lines from your IPTV panel, or your whole WHMCS (customers and lines), ready for Panelr.app",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs",
+    "downloads"
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -12,5 +18,9 @@
   },
   "icons": {
     "48": "icon48.png"
-  }
+  },
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ]
 }

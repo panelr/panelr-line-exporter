@@ -1,6 +1,6 @@
 # Panelr Line Exporter
 
-A Chrome extension that extracts subscriber lines from your IPTV reseller panel, lets you review and clean the data, and exports a CSV ready for import into Panelr.
+A Chrome extension that extracts subscriber lines from your IPTV reseller panel, lets you review and clean the data, and exports a CSV ready for import into Panelr. It can also export a whole WHMCS install for Panelr's Migrate from WHMCS page.
 
 Panelr is an IPTV middleware platform that automates activations, billing, and subscriber management.
 
@@ -8,12 +8,15 @@ Website: https://panelr.app
 Developer Docs: https://panelr.app/developers.php  
 
 ---
+
 ## Supported Panels
 
 | Panel | Notes |
 |-------|-------|
 | **Strong8k** | Full pagination support |
 | **T-Rex** | Full pagination support |
+| **XUI.One** | Lines page (`#datatable-users`). The table carries no customer name or email, so those are filled in on the review page or in Panelr. Contributed by a Panelr customer |
+| **WHMCS** | Whole billing system: every customer and every service, through the WHMCS API. See "Moving from WHMCS" below |
 
 ---
 
@@ -128,3 +131,15 @@ To add support for a new panel type, open `panels.js` and add a new entry to the
 | `products` | Array of product definitions for the review dropdown |
 
 Once added, register the new panel in the `popup.html` dropdown.
+---
+
+## Moving from WHMCS
+
+Panelr's **Migrate from WHMCS** page (Settings → Panel Plugin → Connected services) reads WHMCS through its API directly from your Panelr server. Use this extension's WHMCS mode when that server cannot reach WHMCS: it makes the same read from your own computer and saves a file for the page to upload.
+
+What comes over: every WHMCS client with an email, and every service they hold. In Panelr, each service is matched to a line a connected panel already synced (by the panel line id WHMCS kept as Dedicated IP, else by the line login) and handed to its customer. Lines are never created from WHMCS. Customers keep their WHMCS sign-in password where WHMCS still hands out the login hash; the rest can be emailed a link to choose one.
+
+1. In WHMCS, go to **System Settings → API Credentials** and create a credential whose role allows GetClients, GetClientsProducts, GetProducts and GetClientPassword. Under **General Settings → Security → API IP Access Restriction**, add the address of the computer running the export.
+2. Open your WHMCS admin in a tab, click the extension, choose **WHMCS (billing system)** and paste the identifier and secret. The address is filled in from the tab.
+3. Click **Export from WHMCS** and save `panelr-whmcs-migration.json`. It only reads.
+4. In Panelr, connect each panel and run Sync Now, then open **Migrate from WHMCS** and upload the file under "Or use a file from the Chrome extension".
