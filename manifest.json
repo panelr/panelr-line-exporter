@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Panelr.app Line Exporter",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Export lines from your IPTV panel, or your whole WHMCS (customers and lines), ready for Panelr.app",
   "permissions": [
     "activeTab",

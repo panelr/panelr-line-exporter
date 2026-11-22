@@ -92,7 +92,7 @@ async function startExtraction() {
   });
 
   if (!detected[0]?.result) {
-    progressLabel.textContent = 'Error: Lines table not found. Go to the Lines page first.';
+    progressLabel.textContent = 'Error: Lines table not found. Go to the Lines page (or the MAG page) first.';
     progressFill.style.background = '#ef4444';
     progressFill.style.width = '100%';
     return;
@@ -107,7 +107,9 @@ async function startExtraction() {
 
 let allRows = [];
   let pageNum = 1;
+  // A line is known by its username; a MAG device, which has none, by its MAC address
   const seenUsernames = new Set();
+  const rowKey = r => r.username || r.mac_address || '';
 
 while (true) {
     const pageResult = await chrome.scripting.executeScript({
@@ -120,9 +122,9 @@ while (true) {
     if (pageRows.length === 0) break;
 
     // Wraparound / duplicate detection — stop if all rows on this page already seen
-    const newRows = pageRows.filter(r => !seenUsernames.has(r.username));
+    const newRows = pageRows.filter(r => !seenUsernames.has(rowKey(r)));
     if (newRows.length === 0) break;
-    newRows.forEach(r => seenUsernames.add(r.username));
+    newRows.forEach(r => seenUsernames.add(rowKey(r)));
     allRows = allRows.concat(newRows);
 
     const pct = total ? Math.min(Math.round((allRows.length / total) * 100), 100) : null;

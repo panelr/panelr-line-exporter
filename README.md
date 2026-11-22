@@ -13,7 +13,7 @@ Developer Docs: https://panelr.app/developers.php
 
 | Panel | Notes |
 |-------|-------|
-| **Strong8k** | Full pagination support |
+| **Strong8k** | Full pagination support. Lines page and MAG page (MAG devices are exported by MAC address) |
 | **T-Rex** | Full pagination support |
 | **XUI.One** | Lines page (`#datatable-users`). The table carries no customer name or email, so those are filled in on the review page or in Panelr. Contributed by a Panelr customer |
 | **WHMCS** | Whole billing system: every customer and every service, through the WHMCS API. See "Moving from WHMCS" below |
@@ -74,6 +74,10 @@ Once extraction is complete, click **Open Review Tab**. This opens a full-page r
 
 Click **⬇ Download CSV** to save the file as `panelr-lines-import.csv`. This file is formatted for direct import into Panelr.app.
 
+### MAG devices (Strong8k)
+
+MAG devices are on their own page in the panel. Open the **MAG** page and run the same steps there. The file is saved as `panelr-mag-import.csv`; import it into Panelr the same way, after or before the lines file.
+
 ---
 
 ## CSV Output Format
@@ -85,6 +89,7 @@ The exported CSV contains the following columns:
 | `panel_user_id` | Internal user/line ID from the source panel |
 | `username` | Line username |
 | `password` | Line password |
+| `mac_address` | MAC address of a MAG device (empty for a line with a username) |
 | `expiration_date` | Expiration date as shown in the panel |
 | `status` | `active`, `expired`, or `disabled` |
 | `customer_name` | Customer name (editable in review) |

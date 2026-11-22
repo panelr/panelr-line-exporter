@@ -16,7 +16,7 @@ chrome.storage.local.get(['panelr_rows', 'panelr_panel'], (result) => {
   const panel = PANELS[panelKey];
 
   if (!panel || !allRows.length) {
-    reviewTbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:40px;color:#475569;">No data found. Run the extraction first.</td></tr>`;
+    reviewTbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:40px;color:#475569;">No data found. Run the extraction first.</td></tr>`;
     return;
   }
 
@@ -39,6 +39,7 @@ function buildTable(panel) {
       <td style="color:#64748b;font-size:11px;">${esc(r.panel_user_id)}</td>
       <td><code style="font-size:11px;color:#94a3b8;">${esc(r.username)}</code></td>
       <td><code style="font-size:11px;color:#94a3b8;">${esc(r.password)}</code></td>
+      <td><code style="font-size:11px;color:#94a3b8;">${esc(r.mac_address)}</code></td>
       <td style="white-space:nowrap;">${esc(r.expiration_date)}</td>
       <td><span class="badge badge-${r.status}">${r.status}</span></td>
       <td><input type="text" data-i="${i}" data-f="customer_name" value="${esc(r.customer_name)}"></td>
@@ -91,7 +92,7 @@ btnBulkActive.addEventListener('click', () => {
 });
 
 btnExport.addEventListener('click', () => {
-  const headers = ['panel_user_id', 'username', 'password', 'expiration_date', 'status', 'customer_name', 'customer_email', 'reseller_notes', 'product_id'];
+  const headers = ['panel_user_id', 'username', 'password', 'mac_address', 'expiration_date', 'status', 'customer_name', 'customer_email', 'reseller_notes', 'product_id'];
   const lines = [
     headers.join(','),
     ...allRows.map(r => headers.map(h => csvCell(r[h] || '')).join(','))
@@ -100,7 +101,9 @@ btnExport.addEventListener('click', () => {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
-  a.download = 'panelr-lines-import.csv';
+  // A file of MAG devices only gets its own name, so it does not replace the lines file
+  const magOnly = allRows.length > 0 && allRows.every(r => !r.username && r.mac_address);
+  a.download = magOnly ? 'panelr-mag-import.csv' : 'panelr-lines-import.csv';
   a.click();
   URL.revokeObjectURL(url);
 });

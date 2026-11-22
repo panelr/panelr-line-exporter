@@ -1,4 +1,8 @@
 const PANELS = {
+  // Strong8k and the other brands on the same software. Its Lines page and
+  // its MAG page are one table (#datatable-users) with the same columns,
+  // except the first two: Username and Password on Lines, MAC and SN on MAG.
+  // A MAG device has no login, so it is exported by its MAC address.
   strong8k: {
     name: 'Strong8k (my8k.me)',
     products: [
@@ -9,21 +13,26 @@ const PANELS = {
       { id: 'annual',      label: 'Annual Connection',      duration_months: 12 },
     ],
     extractPage: function() {
+      const firstHeader = (document.querySelector('#datatable-users thead th')?.innerText || '').trim().toUpperCase();
+      const isMag = firstHeader === 'MAC';
       return Array.from(document.querySelectorAll('#datatable-users tbody tr')).map(tr => {
         const tds = tr.querySelectorAll('td');
         const notes = tds[5]?.innerText?.trim() || '';
         const emailMatch = notes.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
         const email = emailMatch ? emailMatch[0] : '';
-        const name = notes.replace(emailMatch ? emailMatch[0] : '', '').replace(/\(User ID:\s*\d+\)/i, '').trim().split('\n')[0].trim();
+        // Panelr writes the note as "Name (email)": with the email taken out, the empty brackets go too
+        const name = notes.replace(emailMatch ? emailMatch[0] : '', '').replace(/\(User ID:\s*\d+\)/i, '').replace(/\(\s*\)/g, '').trim().split('\n')[0].trim();
         const statusText = tds[7]?.querySelector('.badge')?.innerText?.trim() || '';
         const status = statusText === 'Yes' ? 'active' : (statusText === 'Expired' ? 'expired' : 'disabled');
         const linkDropdown = tds[2]?.innerHTML || '';
         const apiMatch = linkDropdown.match(/api\('(\d+)'/);
         const panelUserId = apiMatch ? apiMatch[1] : '';
+        const first = tds[0]?.innerText?.trim() || '';
         return {
           panel_user_id:   panelUserId,
-          username:        tds[0]?.innerText?.trim() || '',
-          password:        tds[1]?.innerText?.trim() || '',
+          username:        isMag ? '' : first,
+          password:        isMag ? '' : (tds[1]?.innerText?.trim() || ''),
+          mac_address:     isMag ? first.toUpperCase() : '',
           expiration_date: tds[3]?.innerText?.trim() || '',
           customer_name:   name,
           customer_email:  email,
@@ -31,7 +40,7 @@ const PANELS = {
           status:          status,
           product_id:      '',
         };
-      }).filter(r => r.username);
+      }).filter(r => r.username || /^([0-9A-F]{2}[:-]?){5}[0-9A-F]{2}$/.test(r.mac_address));
     },
     nextPage: function() {
       const next = document.querySelector('#datatable-users_next:not(.disabled) a, #datatable-users_next:not(.disabled)');
@@ -69,7 +78,7 @@ const PANELS = {
         const notes = tds[10]?.innerText?.trim() || '';
         const emailMatch = notes.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
         const email = emailMatch ? emailMatch[0] : '';
-        const name = notes.replace(emailMatch ? emailMatch[0] : '', '').trim().split('\n')[0].trim();
+        const name = notes.replace(emailMatch ? emailMatch[0] : '', '').replace(/\(\s*\)/g, '').trim().split('\n')[0].trim();
         const actionHtml = tds[12]?.innerHTML || '';
         const apiMatch = actionHtml.match(/api\((\d+),/);
         const panelUserId = apiMatch ? apiMatch[1] : '';
