@@ -109,7 +109,8 @@ btnExport.addEventListener('click', () => {
 });
 
 function csvCell(val) {
-  const s = String(val).replace(/"/g, '""');
+  // One row per line: a line break inside a value is written as a space
+  const s = String(val ?? '').replace(/\s*[\r\n]+\s*/g, ' ').replace(/"/g, '""');
   return /[,"\n\r]/.test(s) ? `"${s}"` : s;
 }
 

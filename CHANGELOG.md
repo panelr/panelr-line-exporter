@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.1
+
+- XUI.One: an expiry the panel shows as a date above a time is written on one line. It used to put a line break in the middle of the CSV row. Dates are read whether the panel shows day-month-year or year-month-day.
+- XUI.One: the MAG page. A MAG device is exported by its MAC address, with no username or password, into the MAC Address column, and with its device number from the panel so Panelr can renew it there.
+- Strong8k: a row whose first cell is a MAC address is exported as a MAG device, whatever the page's first heading says.
+- A line break inside any value is written to the CSV as a space, so each line stays one row.
+
 ## 1.3.0
 
 - Strong8k: MAG devices. On the panel's MAG page the extension reads each device by its MAC address (a MAG device has no username), with its line id, expiry, status and notes. The review page and the CSV have a MAC Address column, and a file of MAG devices is saved as `panelr-mag-import.csv`. Panelr's line import reads the column and brings them in as MAG lines.

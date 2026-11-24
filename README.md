@@ -15,7 +15,7 @@ Developer Docs: https://panelr.app/developers.php
 |-------|-------|
 | **Strong8k** | Full pagination support. Lines page and MAG page (MAG devices are exported by MAC address) |
 | **T-Rex** | Full pagination support |
-| **XUI.One** | Lines page (`#datatable-users`). The table carries no customer name or email, so those are filled in on the review page or in Panelr. Contributed by a Panelr customer |
+| **XUI.One** | Lines page and MAG page (`#datatable-users`). A MAG device is exported by its MAC address. The table carries no customer name or email, so those are filled in on the review page or in Panelr. Contributed by a Panelr customer |
 | **WHMCS** | Whole billing system: every customer and every service, through the WHMCS API. See "Moving from WHMCS" below |
 
 ---
