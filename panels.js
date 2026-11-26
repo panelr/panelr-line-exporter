@@ -231,4 +231,108 @@ const PANELS = {
       return match ? parseInt(match[1].replace(/,/g, ''), 10) : null;
     }
   },
+
+  // Ghost Panel reseller panel: its Manage Users page (#datatable-users).
+  // Columns are found by their headings. The expiry is taken from the
+  // timestamp the table sorts by, so it is exact whatever time zone the panel
+  // shows; the panel's API does not say which package a line is on, so the
+  // product is chosen on the review page.
+  ghost: {
+    name: 'Ghost Panel',
+    hint: 'Open <strong>Manage Users</strong> in your panel, then click Extract. The page\'s own Reseller filter decides whose lines are read: choose yourself there to leave your sub-resellers\' lines out. Showing 1000 entries first makes it quicker.',
+    products: [
+      { id: 'trial',       label: '24hr Free Trial',        duration_months: 0  },
+      { id: 'monthly',     label: 'Monthly Connection',     duration_months: 1  },
+      { id: 'quarterly',   label: 'Quarterly Connection',   duration_months: 3  },
+      { id: 'semi_annual', label: 'Semi-Annual Connection', duration_months: 6  },
+      { id: 'annual',      label: 'Annual Connection',      duration_months: 12 },
+    ],
+    extractPage: function() {
+      // ID, Username, Password, Reseller, Status, Online, Trial, Expiration,
+      // Active, Conns., Last, Ch, IP, Actions
+      const table = document.querySelector('#datatable-users');
+      if (!table) return [];
+      const heads = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.replace(/\s+/g, ' ').trim().toUpperCase());
+      const col = (fallback, ...names) => {
+        for (const n of names) { const i = heads.indexOf(n); if (i >= 0) return i; }
+        for (const n of names) { const i = heads.findIndex(h => h.startsWith(n)); if (i >= 0) return i; }
+        return fallback;
+      };
+      const idCol   = col(0, 'ID');
+      const userCol = col(1, 'USERNAME');
+      const passCol = col(2, 'PASSWORD');
+      const statCol = col(4, 'STATUS');
+      const triCol  = col(6, 'TRIAL');
+      const expCol  = col(7, 'EXPIRATION', 'EXPIRY', 'EXPIRE');
+      const actCol  = col(heads.length - 1, 'ACTIONS');
+      const two = n => String(n).padStart(2, '0');
+
+      return Array.from(table.querySelectorAll('tbody tr')).map(tr => {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length < 8) return null;
+        const text = i => (tds[i]?.innerText || '').replace(/\s+/g, ' ').trim();
+
+        // The cell carries the moment itself beside the date it shows: that
+        // is written, in UTC, which is what Panelr keeps
+        let expiration = '';
+        const stamp = parseInt(tds[expCol]?.querySelector('[data-order]')?.getAttribute('data-order') || '', 10);
+        if (stamp > 0) {
+          const d = new Date(stamp * 1000);
+          expiration = `${d.getUTCFullYear()}-${two(d.getUTCMonth() + 1)}-${two(d.getUTCDate())} ${two(d.getUTCHours())}:${two(d.getUTCMinutes())}:${two(d.getUTCSeconds())}`;
+        } else {
+          const m = text(expCol).match(/^(\d{4})-(\d{2})-(\d{2})(?: (\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+          if (m) expiration = `${m[1]}-${m[2]}-${m[3]} ${two(m[4] || 0)}:${two(m[5] || 0)}:${two(m[6] || 0)}`;
+        }
+
+        // A green dot is a running line, an amber one has expired, anything
+        // else (banned, switched off) cannot be used
+        const statusHtml = tds[statCol]?.innerHTML || '';
+        const status = statusHtml.includes('text-success') ? 'active'
+                     : statusHtml.includes('text-warning') ? 'expired'
+                     : 'disabled';
+        // The Trial dot is gray for a paid line and filled in for a trial
+        const trialHtml = tds[triCol]?.innerHTML || '';
+        const trial = trialHtml !== '' && !trialHtml.includes('text-secondary');
+
+        // The first button under Actions is the note: its tooltip is the note's text
+        const noteBtn = tds[actCol]?.querySelector('button');
+        const notes = noteBtn && !noteBtn.disabled && noteBtn.querySelector('.mdi-note')
+          ? (noteBtn.getAttribute('data-original-title') || noteBtn.getAttribute('title') || '').replace(/\s+/g, ' ').trim()
+          : '';
+        const emailMatch = notes.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+        const email = emailMatch ? emailMatch[0] : '';
+        // Panelr writes a note as "Name (email)": with the email taken out, the empty brackets go too
+        const name = email ? notes.replace(email, '').replace(/\(\s*\)/g, '').trim() : '';
+
+        return {
+          panel_user_id:   text(idCol),
+          username:        text(userCol),
+          password:        text(passCol),
+          mac_address:     '',
+          expiration_date: expiration,
+          customer_name:   name,
+          customer_email:  email,
+          reseller_notes:  notes,
+          status:          status,
+          product_id:      trial ? 'trial' : '',
+        };
+      }).filter(r => r && r.username);
+    },
+    nextPage: function() {
+      const next = document.querySelector('#datatable-users_next:not(.disabled) a, #datatable-users_next:not(.disabled)');
+      if (next) { next.click(); return true; }
+      return false;
+    },
+    detect: function() {
+      const table = document.querySelector('#datatable-users');
+      if (!table) return false;
+      const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.replace(/\s+/g, ' ').trim().toUpperCase());
+      return ['ID', 'USERNAME', 'PASSWORD', 'RESELLER', 'EXPIRATION'].every(h => headers.includes(h));
+    },
+    getTotal: function() {
+      const text = document.querySelector('#datatable-users_info')?.innerText || '';
+      const match = text.match(/of\s+([\d,]+)/i) || text.match(/([\d,]+)\s+entries/i);
+      return match ? parseInt(match[1].replace(/,/g, ''), 10) : null;
+    }
+  },
 };

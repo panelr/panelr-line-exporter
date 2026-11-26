@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.0
+
+- Ghost Panel: a new panel option for its Manage Users page. Reads line id, login, password, status, trial and expiry, pages through the table, marks trial lines as the trial product, and takes the note and any email in it. The expiry is written in UTC from the table's own timestamp, so it is right whatever time zone the panel shows.
+- The hint under the panel list now says which page to open for the panel chosen.
+
 ## 1.3.1
 
 - XUI.One: an expiry the panel shows as a date above a time is written on one line. It used to put a line break in the middle of the CSV row. Dates are read whether the panel shows day-month-year or year-month-day.

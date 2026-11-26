@@ -7,6 +7,8 @@ const progressFill = document.getElementById('progress-fill');
 const progressLabel= document.getElementById('progress-label');
 const doneMsgEl    = document.getElementById('done-msg');
 const btnOpenReview= document.getElementById('btn-open-review');
+// What the hint says for a panel that has no words of its own
+const defaultHint  = setupHint.innerHTML;
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -26,6 +28,7 @@ panelSelect.addEventListener('change', async () => {
   selectedPanelKey = panelSelect.value;
   const isWhmcs = selectedPanelKey === 'whmcs';
   whmcsFields.style.display = isWhmcs ? 'block' : 'none';
+  setupHint.innerHTML = (PANELS[selectedPanelKey] && PANELS[selectedPanelKey].hint) || defaultHint;
   setupHint.style.display = selectedPanelKey && !isWhmcs ? 'block' : 'none';
   btnExtract.textContent = isWhmcs ? 'Export from WHMCS' : 'Extract Lines';
   if (isWhmcs && whmcsUrl.value.trim() === '') {
@@ -92,7 +95,7 @@ async function startExtraction() {
   });
 
   if (!detected[0]?.result) {
-    progressLabel.textContent = 'Error: Lines table not found. Go to the Lines page (or the MAG page) first.';
+    progressLabel.textContent = 'Error: Lines table not found. Open your panel\'s lines page first, and check the right panel is chosen above.';
     progressFill.style.background = '#ef4444';
     progressFill.style.width = '100%';
     return;
